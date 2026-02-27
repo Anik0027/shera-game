@@ -1,0 +1,439 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Funny Quiz Game 😄</title>
+  <style>
+    :root{
+      --bg1:#0b1020;
+      --bg2:#141a33;
+      --card:#0f1630cc;
+      --text:#eaf0ff;
+      --muted:#aab6ffcc;
+      --yes:#38d39f;
+      --no:#ff5c7a;
+      --shadow: 0 20px 60px rgba(0,0,0,.45);
+    }
+    *{box-sizing:border-box;}
+    body{
+      margin:0;
+      min-height:100vh;
+      display:grid;
+      place-items:center;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color:var(--text);
+      background:
+        radial-gradient(1200px 800px at 20% 10%, #2b3cff22, transparent 60%),
+        radial-gradient(1000px 700px at 80% 20%, #ff3b7a22, transparent 60%),
+        linear-gradient(160deg, var(--bg1), var(--bg2));
+      overflow:hidden;
+    }
+    .card{
+      width:min(900px, 92vw);
+      padding:26px 22px;
+      background:var(--card);
+      border:1px solid rgba(255,255,255,.08);
+      border-radius:22px;
+      box-shadow:var(--shadow);
+      backdrop-filter: blur(10px);
+      position:relative;
+    }
+    h1{ margin:0 0 6px; font-size:clamp(24px, 4.8vw, 40px); }
+    p{ margin:0 0 14px; color:var(--muted); }
+
+    .row{ display:flex; gap:10px; flex-wrap:wrap; align-items:center; }
+    input{
+      flex:1; min-width:220px;
+      padding:12px 14px;
+      border-radius:14px;
+      border:1px solid rgba(255,255,255,.12);
+      background:rgba(255,255,255,.05);
+      color:var(--text);
+      outline:none;
+      font-size:16px;
+    }
+    input::placeholder{ color:#b7c0ff88; }
+
+    .btn{
+      border:none; cursor:pointer;
+      font-size:16px;
+      padding:12px 18px;
+      border-radius:999px;
+      font-weight:800;
+      box-shadow: 0 12px 26px rgba(0,0,0,.35);
+      user-select:none;
+      -webkit-tap-highlight-color: transparent;
+      transition: transform 180ms ease, filter 180ms ease;
+    }
+    .btn:active{ transform: scale(.98); }
+    .primary{
+      background: linear-gradient(135deg, #45f7b5, var(--yes));
+      color:#052016;
+    }
+
+    .panel{ margin-top:14px; display:none; }
+    .panel.active{ display:block; }
+
+    .questionTitle{
+      margin:8px 0 6px;
+      font-size:clamp(20px, 4vw, 30px);
+    }
+
+    .arena{
+      position:relative;
+      height:240px;
+      border-radius:18px;
+      border:1px dashed rgba(255,255,255,.12);
+      background: rgba(255,255,255,.03);
+      overflow:hidden;
+      display:flex;
+      align-items:center;
+      justify-content:center;
+      margin-top:10px;
+    }
+
+    .yes{
+      background: linear-gradient(135deg, #45f7b5, var(--yes));
+      color:#052016;
+    }
+    .no{
+      position:absolute;
+      left:50%;
+      top:55%;
+      transform: translate(-50%, -50%);
+      background: linear-gradient(135deg, #ff7a92, var(--no));
+      color:#2b0010;
+      will-change: left, top, transform;
+      touch-action: manipulation;
+    }
+
+    /* BOUNCY dodge animation (graphical move) */
+    @keyframes bouncyDodge {
+      0%   { left: var(--sx); top: var(--sy); transform: rotate(var(--sr)) scale(1); }
+      55%  { left: calc(var(--ex) + var(--ox)); top: calc(var(--ey) + var(--oy)); transform: rotate(var(--er)) scale(1.10); }
+      78%  { left: calc(var(--ex) - (var(--ox) * 0.45)); top: calc(var(--ey) - (var(--oy) * 0.45)); transform: rotate(calc(var(--er) * 0.6)) scale(0.98); }
+      92%  { left: calc(var(--ex) + (var(--ox) * 0.18)); top: calc(var(--ey) + (var(--oy) * 0.18)); transform: rotate(calc(var(--er) * 0.85)) scale(1.02); }
+      100% { left: var(--ex); top: var(--ey); transform: rotate(var(--er)) scale(1); }
+    }
+    .dodge{ animation: bouncyDodge 520ms cubic-bezier(.2,.9,.2,1) both; }
+
+    .hud{
+      margin-top:12px;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      flex-wrap:wrap;
+      color:#c8d2ffbb;
+      font-size:14px;
+    }
+
+    /* FINAL GIF stage */
+    .memeStage{
+      margin-top:14px;
+      border-radius:18px;
+      border:1px solid rgba(255,255,255,.10);
+      background: rgba(255,255,255,.03);
+      min-height:320px;
+      padding:14px;
+      display:grid;
+      place-items:center;
+      overflow:hidden;
+    }
+    .finalGif{
+      width:min(760px, 100%);
+      border-radius:16px;
+      border:1px solid rgba(255,255,255,.10);
+      box-shadow: 0 18px 50px rgba(0,0,0,.40);
+      display:block;
+    }
+    .gifCaption{
+      margin-top:10px;
+      font-weight:900;
+      font-size:clamp(16px, 3.4vw, 22px);
+      color:#ffd0e2;
+      text-align:center;
+      text-shadow: 0 0 12px rgba(255,100,160,.45);
+      opacity:.95;
+    }
+
+    .footer{
+      margin-top:10px;
+      font-size:12px;
+      opacity:.55;
+      text-align:center;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="card">
+    <div class="panel active" id="startPanel">
+      <h1>মজার কুইজ গেম 😄</h1>
+      <p>নাম দাও, তারপর কয়েকটা মজার প্রশ্ন আসবে। “No” চাপতে গেলে ওটা ডজ করবে 😅</p>
+      <div class="row">
+        <input id="nameInput" placeholder="তোমার নাম লিখো (যেমন: Anik / Arafat)" />
+        <button class="btn primary" id="startBtn">Start</button>
+      </div>
+      <div class="footer">Tip: মোবাইলেও কাজ করবে ✅</div>
+    </div>
+
+    <div class="panel" id="gamePanel">
+      <div class="hud">
+        <div>Player: <b id="playerName">—</b></div>
+        <div>Question: <b id="qIndex">1</b>/<span id="qTotal">—</span></div>
+        <div>Score: <b id="score">0</b></div>
+      </div>
+
+      <div class="questionTitle" id="questionText">—</div>
+      <p id="subText">মজা করো 😆</p>
+
+      <div class="arena" id="arena">
+        <button class="btn yes" id="yesBtn">Yes</button>
+        <button class="btn no"  id="noBtn">No</button>
+      </div>
+    </div>
+
+    <div class="panel" id="endPanel">
+      <h1 id="endTitle">Final 😄</h1>
+      <p id="endDesc">—</p>
+
+      <div class="memeStage" id="memeStage">
+        <!-- GIF inserted by JS -->
+      </div>
+
+      <div class="row" style="margin-top:14px;">
+        <button class="btn primary" id="playAgainBtn">Play Again</button>
+      </div>
+      <div class="footer">Made with love 💖</div>
+    </div>
+  </div>
+
+  <script>
+    // --- CONFIG: special question rule ---
+    const SPECIAL_QUESTION = "তোমার হাসি কি সবচেয়ে কিউট? 😅";
+
+    // Put your GIF file in same folder as index.html and name it final.gif
+    const FINAL_GIF_SRC = "final.gif";
+
+    const QUESTIONS = [
+      "তুমি কি একটু পাগলি টাইপ? 😜",
+      "Anik is your boss Right? 😄",
+      SPECIAL_QUESTION,
+      "তুমি কি আজকে একটু দুষ্টুমি করবা? 😈",
+      "তুমি কি মজা করতে ভালোবাসো? 😆"
+    ];
+
+    const startPanel = document.getElementById("startPanel");
+    const gamePanel  = document.getElementById("gamePanel");
+    const endPanel   = document.getElementById("endPanel");
+
+    const nameInput  = document.getElementById("nameInput");
+    const startBtn   = document.getElementById("startBtn");
+
+    const playerName = document.getElementById("playerName");
+    const qIndexEl   = document.getElementById("qIndex");
+    const qTotalEl   = document.getElementById("qTotal");
+    const scoreEl    = document.getElementById("score");
+
+    const questionText = document.getElementById("questionText");
+    const arena = document.getElementById("arena");
+    const yesBtn = document.getElementById("yesBtn");
+    const noBtn  = document.getElementById("noBtn");
+
+    const endTitle = document.getElementById("endTitle");
+    const endDesc  = document.getElementById("endDesc");
+    const memeStage = document.getElementById("memeStage");
+    const playAgainBtn = document.getElementById("playAgainBtn");
+
+    let idx = 0;
+    let score = 0;
+    let dodging = false;
+
+    qTotalEl.textContent = QUESTIONS.length;
+
+    function show(panel){
+      [startPanel, gamePanel, endPanel].forEach(p => p.classList.remove("active"));
+      panel.classList.add("active");
+    }
+
+    function startGame(){
+      const nm = (nameInput.value || "").trim() || "Player";
+      playerName.textContent = nm;
+      idx = 0;
+      score = 0;
+      scoreEl.textContent = score;
+      qIndexEl.textContent = 1;
+      questionText.textContent = QUESTIONS[idx];
+      show(gamePanel);
+
+      setTimeout(() => {
+        placeNoCenter();
+        bouncyDodge();
+      }, 120);
+    }
+
+    function placeNoCenter(){
+      const a = arena.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+      noBtn.style.left = (a.width/2 - b.width/2) + "px";
+      noBtn.style.top  = (a.height/2 - b.height/2) + "px";
+      noBtn.style.transform = "rotate(0deg)";
+    }
+
+    function currentPos(){
+      const a = arena.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+      return { x: b.left - a.left, y: b.top - a.top };
+    }
+
+    function randomTarget(){
+      const a = arena.getBoundingClientRect();
+      const b = noBtn.getBoundingClientRect();
+      const pad = 14;
+      const maxX = a.width - b.width - pad*2;
+      const maxY = a.height - b.height - pad*2;
+      return {
+        x: pad + Math.random() * Math.max(0, maxX),
+        y: pad + Math.random() * Math.max(0, maxY)
+      };
+    }
+
+    function bouncyDodge(){
+      if (dodging) return;
+      dodging = true;
+
+      const cur = currentPos();
+      noBtn.style.left = cur.x + "px";
+      noBtn.style.top  = cur.y + "px";
+
+      const next = randomTarget();
+      const ox = (Math.random() * 34 + 16) * (Math.random() < 0.5 ? -1 : 1);
+      const oy = (Math.random() * 34 + 16) * (Math.random() < 0.5 ? -1 : 1);
+      const endRot = (Math.random() * 18 - 9).toFixed(1) + "deg";
+
+      noBtn.style.setProperty("--sx", cur.x + "px");
+      noBtn.style.setProperty("--sy", cur.y + "px");
+      noBtn.style.setProperty("--ex", next.x + "px");
+      noBtn.style.setProperty("--ey", next.y + "px");
+      noBtn.style.setProperty("--ox", ox.toFixed(0) + "px");
+      noBtn.style.setProperty("--oy", oy.toFixed(0) + "px");
+      noBtn.style.setProperty("--sr", "0deg");
+      noBtn.style.setProperty("--er", endRot);
+
+      noBtn.classList.remove("dodge");
+      void noBtn.offsetWidth;
+      noBtn.classList.add("dodge");
+
+      const end = () => {
+        noBtn.style.left = next.x + "px";
+        noBtn.style.top  = next.y + "px";
+        noBtn.style.transform = `rotate(${endRot})`;
+        noBtn.classList.remove("dodge");
+        noBtn.removeEventListener("animationend", end);
+        dodging = false;
+      };
+      noBtn.addEventListener("animationend", end);
+    }
+
+    function nextQuestion(){
+      idx++;
+      if(idx >= QUESTIONS.length){
+        finish();
+        return;
+      }
+      qIndexEl.textContent = (idx + 1).toString();
+      questionText.textContent = QUESTIONS[idx];
+
+      // make No dodge a bit for fun (except special question)
+      setTimeout(() => {
+        if (QUESTIONS[idx] !== SPECIAL_QUESTION) bouncyDodge();
+      }, 120);
+    }
+
+    function finish(){
+      show(endPanel);
+      const nm = playerName.textContent || "Player";
+      endTitle.textContent = `Final 😄`;
+      endDesc.textContent  = `${nm}, তোমার স্কোর: ${score}/${QUESTIONS.length} ✅`;
+
+      showFinalGif(nm);
+    }
+
+    function showFinalGif(nm){
+      memeStage.innerHTML = "";
+
+      const img = document.createElement("img");
+      img.className = "finalGif";
+      img.src = FINAL_GIF_SRC;
+      img.alt = "Final meme gif";
+      img.loading = "eager";
+
+      // If GIF missing, show message
+      img.onerror = () => {
+        memeStage.innerHTML = `
+          <div style="text-align:center; padding:18px;">
+            <div style="font-weight:900; font-size:20px; color:#ffd0e2;">
+              final.gif পাওয়া যায়নি ❌
+            </div>
+            <div style="margin-top:8px; color:#c8d2ffbb;">
+              GIF ফাইলটা index.html এর পাশে <b>final.gif</b> নামে আপলোড করো।
+            </div>
+          </div>
+        `;
+      };
+
+      const cap = document.createElement("div");
+      cap.className = "gifCaption";
+      cap.textContent = `${nm}, Lock kijiye? 😄`;
+
+      memeStage.appendChild(img);
+      memeStage.appendChild(cap);
+    }
+
+    // --- EVENTS ---
+    startBtn.addEventListener("click", startGame);
+    nameInput.addEventListener("keydown", (e) => {
+      if(e.key === "Enter") startGame();
+    });
+
+    // YES behavior:
+    // - SPECIAL question: YES should bounce (not go next)
+    // - others: score + go next
+    yesBtn.addEventListener("click", () => {
+      if (QUESTIONS[idx] === SPECIAL_QUESTION) {
+        bouncyDodge();
+        return;
+      }
+      score++;
+      scoreEl.textContent = score;
+      setTimeout(nextQuestion, 250);
+    });
+
+    // NO behavior:
+    // - SPECIAL question: NO should go next
+    // - others: dodge forever
+    ["pointerenter", "pointerdown", "mouseenter", "touchstart"].forEach(evt => {
+      noBtn.addEventListener(evt, (e) => {
+        if (QUESTIONS[idx] === SPECIAL_QUESTION) return;
+        e.preventDefault();
+        bouncyDodge();
+      }, { passive:false });
+    });
+
+    noBtn.addEventListener("click", (e) => {
+      if (QUESTIONS[idx] === SPECIAL_QUESTION) {
+        nextQuestion();
+        return;
+      }
+      e.preventDefault();
+      bouncyDodge();
+    });
+
+    playAgainBtn.addEventListener("click", () => {
+      show(startPanel);
+      memeStage.innerHTML = "";
+    });
+  </script>
+</body>
+</html>
